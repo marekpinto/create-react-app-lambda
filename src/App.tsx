@@ -7,6 +7,9 @@ import { Select, Typography } from "@mui/material";
 import {} from "./globals";
 import { IUniversityClass } from "./types/api_types";
 
+import { GradeTable } from "./components/GradeTable";
+import { Dropdown } from "./components/Dropdown";
+
 function App() {
   // You will need to use more of these!
   const [currClassId, setCurrClassId] = useState<string>("");
@@ -47,16 +50,14 @@ function App() {
             Select a class
           </Typography>
           <div style={{ width: "100%" }}>
-            <Select fullWidth={true} label="Class">
-              {/* You'll need to place some code here to generate the list of items in the selection */}
-            </Select>
+            <Dropdown />
           </div>
         </Grid>
         <Grid xs={12} md={8}>
           <Typography variant="h4" gutterBottom>
             Final Grades
           </Typography>
-          <div>Place the grade table here</div>
+          <GradeTable />
         </Grid>
       </Grid>
     </div>
