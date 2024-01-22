@@ -1,7 +1,10 @@
+import React, { useEffect, useState } from "react";
+
 import Box from '@mui/material/Box';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import {BASE_API_URL, GET_DEFAULT_HEADERS, MY_BU_ID} from "../globals";
-import { IStudentClass } from "../types/api_types";
+import { IStudentClass, IUniversityClass } from "../types/api_types";
+import { PowerInput } from '@mui/icons-material';
 
 
 /**
@@ -13,6 +16,15 @@ import { IStudentClass } from "../types/api_types";
  */
 
 //Citation: This code based on example code at https://mui.com/x/react-data-grid/
+
+interface Row {
+  id: string;
+  name: string;
+  classId: string;
+  className: string;
+  semester: string;
+  finalGrade: number;
+}
 
 export function dummyData() {
   return [
@@ -58,15 +70,15 @@ const fetchStudents = async (classId: string) => {
   );
 }
 
-export async function populateTable (classId: string) {
-  const students: IStudentClass[] = await fetchStudents(classId);
-  const rows = [];
-  return students.map((student) => (
-    { id: student.studentId, name: student.name, classId: classId,  }
-  )
-  )
-
+const getClassById = async (classId: string) => {
+  const res = await fetch(BASE_API_URL + "/class/GetById" + classId + "?buid=" + MY_BU_ID, {
+    method: "GET",
+    headers: GET_DEFAULT_HEADERS()
+  });
+  return await res.json();
 }
+
+
 
 const columns: GridColDef[] = [
   { field: 'id', headerName: 'Student ID', width: 90 },
@@ -111,10 +123,26 @@ interface Props {
  *
  */
 export const GradeTable: React.FC<Props> = ({classId}) => {
+  const [rows, setRows] = useState<Row[]>([]);
+
+  async function populateTable (classId: string) {
+    const students: IStudentClass[] = await fetchStudents(classId);
+    const course : IUniversityClass = await getClassById(classId);
+    setRows(students.map((student) => (
+      { id: student.studentId, name: student.name, classId: classId, className: course.title, semester: 'fall2022', finalGrade: 0 }
+    )
+    ));
+  
+  }
+
+  useEffect(() => {
+    populateTable(classId);
+  }, []);
+
   return (
     <Box sx={{ height: 400, width: '90%' }}>
       <DataGrid
-        rows={dummyData()}
+        rows={rows}
         columns={columns}
         pagination
         initialState={{
