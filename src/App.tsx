@@ -1,19 +1,40 @@
 import React, { useEffect, useState } from "react";
 import Grid from "@mui/material/Unstable_Grid2";
-import { Select, Typography } from "@mui/material";
+import { Select, SelectChangeEvent, Typography } from "@mui/material";
+import MenuItem from '@mui/material/MenuItem';
+
 /**
  * You will find globals from this file useful!
  */
-import {} from "./globals";
+import {BASE_API_URL, GET_DEFAULT_HEADERS, MY_BU_ID} from "./globals";
 import { IUniversityClass } from "./types/api_types";
 
 import { GradeTable } from "./components/GradeTable";
-import { Dropdown } from "./components/Dropdown";
 
 function App() {
   // You will need to use more of these!
   const [currClassId, setCurrClassId] = useState<string>("");
   const [classList, setClassList] = useState<IUniversityClass[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+        const headers = GET_DEFAULT_HEADERS();
+        const res = await fetch(BASE_API_URL + "/class/listBySemester/fall2022?buid=" + MY_BU_ID, {
+          method: "GET",
+          headers: headers,
+        });
+        const json: IUniversityClass[] = await res.json();
+        console.log(json);
+        setClassList(json);
+      };
+
+    fetchData();
+  }, []); // Run this effect only once when the component mounts
+
+  const handleChange = (event: SelectChangeEvent<string>) => {
+    setCurrClassId((event.target.value));
+  };
+
 
   /**
    * This is JUST an example of how you might fetch some data(with a different API).
@@ -50,7 +71,13 @@ function App() {
             Select a class
           </Typography>
           <div style={{ width: "100%" }}>
-            <Dropdown />
+            <Select value={currClassId} onChange={handleChange} fullWidth={true} label="Class">
+              {classList.map((course) => (
+                <MenuItem key={course.classId} value={course.classId}>
+                  {course.title}
+                </MenuItem>
+              ))}
+            </Select>
           </div>
         </Grid>
         <Grid xs={12} md={8}>
