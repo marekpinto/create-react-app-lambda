@@ -1,5 +1,7 @@
 import Box from '@mui/material/Box';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import {BASE_API_URL, GET_DEFAULT_HEADERS, MY_BU_ID} from "../globals";
+import { IStudentClass } from "../types/api_types";
 
 
 /**
@@ -24,6 +26,46 @@ export function dummyData() {
     { id: "U135", name:"Brown", classId: 'C125', className: 'ST 519', semester: 'fall2022', finalGrade: 458.2 },
     { id: "U136", name:"Jimmy", classId: 'C125', className: 'ST 519', semester: 'fall2022', finalGrade: 390.2 },
   ];
+}
+
+const fetchStudentIds = async (classId: string) => {
+  const headers = GET_DEFAULT_HEADERS();
+  const res = await fetch(BASE_API_URL + "/class/listStudents/" + classId + "?buid=" + MY_BU_ID, {
+    method: "GET",
+    headers: headers,
+  });
+  const students: string[] = await res.json();
+  return students;
+};
+
+//Promise.all to wait for all promises to be resolved before returning (credit: ChatGPT)
+const fetchStudents = async (classId: string) => {
+  const headers = GET_DEFAULT_HEADERS();
+  const students: string[] = await fetchStudentIds(classId);
+  return Promise.all ( students.map(async (studentId) => {
+    const res = await fetch(BASE_API_URL + "/student/GetById/" + studentId + "?buid=" + MY_BU_ID, {
+      method: "GET",
+      headers: headers,
+    });
+    const studentData = await res.json();
+    const student: IStudentClass = {
+      ...studentData,
+      studentId: studentId,
+    };
+
+    return student;
+  })
+  );
+}
+
+export async function populateTable (classId: string) {
+  const students: IStudentClass[] = await fetchStudents(classId);
+  const rows = [];
+  return students.map((student) => (
+    { id: student.studentId, name: student.name, classId: classId,  }
+  )
+  )
+
 }
 
 const columns: GridColDef[] = [
@@ -57,6 +99,10 @@ const columns: GridColDef[] = [
   },
 ];
 
+interface Props {
+  classId: string;
+}
+
 /**
  * This is the component where you should write the code for displaying the
  * the table of grades.
@@ -64,7 +110,7 @@ const columns: GridColDef[] = [
  * You might need to change the signature of this function.
  *
  */
-export const GradeTable = () => {
+export const GradeTable: React.FC<Props> = ({classId}) => {
   return (
     <Box sx={{ height: 400, width: '90%' }}>
       <DataGrid

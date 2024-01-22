@@ -84,7 +84,7 @@ function App() {
           <Typography variant="h4" gutterBottom>
             Final Grades
           </Typography>
-          <GradeTable />
+          <GradeTable classId={currClassId} />
         </Grid>
       </Grid>
     </div>
