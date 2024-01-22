@@ -7,14 +7,26 @@ import MenuItem from '@mui/material/MenuItem';
  * You will find globals from this file useful!
  */
 import {BASE_API_URL, GET_DEFAULT_HEADERS, MY_BU_ID} from "./globals";
-import { IUniversityClass } from "./types/api_types";
+import { IUniversityClass, IStudentClass } from "./types/api_types";
 
 import { GradeTable } from "./components/GradeTable";
+
+interface Row {
+  id: string;
+  name: string;
+  classId: string;
+  className: string;
+  semester: string;
+  finalGrade: number;
+}
 
 function App() {
   // You will need to use more of these!
   const [currClassId, setCurrClassId] = useState<string>("");
   const [classList, setClassList] = useState<IUniversityClass[]>([]);
+  const [rows, setRows] = useState<Row[]>([]);
+
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -24,7 +36,6 @@ function App() {
           headers: headers,
         });
         const json: IUniversityClass[] = await res.json();
-        console.log(json);
         setClassList(json);
       };
 
@@ -33,30 +44,61 @@ function App() {
 
   const handleChange = (event: SelectChangeEvent<string>) => {
     setCurrClassId((event.target.value));
+    populateTable(event.target.value);
   };
 
-
-  /**
-   * This is JUST an example of how you might fetch some data(with a different API).
-   * As you might notice, this does not show up in your console right now.
-   * This is because the function isn't called by anything!
-   *
-   * You will need to lookup how to fetch data from an API using React.js
-   * Something you might want to look at is the useEffect hook.
-   *
-   * The useEffect hook will be useful for populating the data in the dropdown box.
-   * You will want to make sure that the effect is only called once at component mount.
-   *
-   * You will also need to explore the use of async/await.
-   *
-   */
-  const fetchSomeData = async () => {
-    const res = await fetch("https://cat-fact.herokuapp.com/facts/", {
+  const fetchStudentIds = async (classId: string) => {
+    const headers = GET_DEFAULT_HEADERS();
+    const res = await fetch(BASE_API_URL + "/class/listStudents/" + classId + "?buid=" + MY_BU_ID, {
       method: "GET",
+      headers: headers,
     });
-    const json = await res.json();
-    console.log(json);
+    const students: string[] = await res.json();
+    return students;
   };
+  
+  
+  const fetchStudents = async (classId: string) => {
+    const headers = GET_DEFAULT_HEADERS();
+    const students: string[] = await fetchStudentIds(classId);
+
+    
+    return Promise.all ( students.map(async (studentId) => {
+      const res = await fetch(BASE_API_URL + "/student/GetById/" + studentId + "?buid=" + MY_BU_ID, {
+        method: "GET",
+        headers: headers,
+      });
+      const studentData = await res.json();
+      const student: IStudentClass = {
+        ...studentData[0],
+        studentId: studentId,
+      };
+
+  
+      return student;
+    })
+    );
+  }
+  
+  const getClassById = async (classId: string) => {
+    const res = await fetch(BASE_API_URL + "/class/GetById/" + classId + "?buid=" + MY_BU_ID, {
+      method: "GET",
+      headers: GET_DEFAULT_HEADERS()
+    });
+    return await res.json();
+  }
+  
+
+  async function populateTable (classId: string) {
+    const students: IStudentClass[] = await fetchStudents(classId);
+    const course : IUniversityClass = await getClassById(classId);
+    setRows(students.map((student) => (
+      { id: student.studentId, name: student.name, classId: classId, className: course.title, semester: 'fall2022', finalGrade: 0 }
+    )
+    ));
+  
+  }
+  
 
   return (
     <div style={{ width: "100vw", height: "100vh" }}>
@@ -84,7 +126,7 @@ function App() {
           <Typography variant="h4" gutterBottom>
             Final Grades
           </Typography>
-          <GradeTable classId={currClassId} />
+          <GradeTable rows={rows} />
         </Grid>
       </Grid>
     </div>

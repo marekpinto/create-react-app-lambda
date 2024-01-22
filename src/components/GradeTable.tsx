@@ -40,44 +40,6 @@ export function dummyData() {
   ];
 }
 
-const fetchStudentIds = async (classId: string) => {
-  const headers = GET_DEFAULT_HEADERS();
-  const res = await fetch(BASE_API_URL + "/class/listStudents/" + classId + "?buid=" + MY_BU_ID, {
-    method: "GET",
-    headers: headers,
-  });
-  const students: string[] = await res.json();
-  return students;
-};
-
-//Promise.all to wait for all promises to be resolved before returning (credit: ChatGPT)
-const fetchStudents = async (classId: string) => {
-  const headers = GET_DEFAULT_HEADERS();
-  const students: string[] = await fetchStudentIds(classId);
-  return Promise.all ( students.map(async (studentId) => {
-    const res = await fetch(BASE_API_URL + "/student/GetById/" + studentId + "?buid=" + MY_BU_ID, {
-      method: "GET",
-      headers: headers,
-    });
-    const studentData = await res.json();
-    const student: IStudentClass = {
-      ...studentData,
-      studentId: studentId,
-    };
-
-    return student;
-  })
-  );
-}
-
-const getClassById = async (classId: string) => {
-  const res = await fetch(BASE_API_URL + "/class/GetById" + classId + "?buid=" + MY_BU_ID, {
-    method: "GET",
-    headers: GET_DEFAULT_HEADERS()
-  });
-  return await res.json();
-}
-
 
 
 const columns: GridColDef[] = [
@@ -112,7 +74,7 @@ const columns: GridColDef[] = [
 ];
 
 interface Props {
-  classId: string;
+  rows: Row[];
 }
 
 /**
@@ -122,22 +84,8 @@ interface Props {
  * You might need to change the signature of this function.
  *
  */
-export const GradeTable: React.FC<Props> = ({classId}) => {
-  const [rows, setRows] = useState<Row[]>([]);
+export const GradeTable: React.FC<Props> = ({rows}) => {
 
-  async function populateTable (classId: string) {
-    const students: IStudentClass[] = await fetchStudents(classId);
-    const course : IUniversityClass = await getClassById(classId);
-    setRows(students.map((student) => (
-      { id: student.studentId, name: student.name, classId: classId, className: course.title, semester: 'fall2022', finalGrade: 0 }
-    )
-    ));
-  
-  }
-
-  useEffect(() => {
-    populateTable(classId);
-  }, []);
 
   return (
     <Box sx={{ height: 400, width: '90%' }}>
