@@ -25,6 +25,7 @@ function App() {
   const [currClassId, setCurrClassId] = useState<string>("");
   const [classList, setClassList] = useState<IUniversityClass[]>([]);
   const [rows, setRows] = useState<Row[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
 
 
 
@@ -42,9 +43,11 @@ function App() {
     fetchData();
   }, []); // Run this effect only once when the component mounts
 
-  const handleChange = (event: SelectChangeEvent<string>) => {
+  const handleChange = async (event: SelectChangeEvent<string>) => {
+    setLoading(true);
     setCurrClassId((event.target.value));
-    populateTable(event.target.value);
+    await populateTable(event.target.value);
+    setLoading(false);
   };
 
   const fetchStudentIds = async (classId: string) => {
@@ -126,7 +129,7 @@ function App() {
           <Typography variant="h4" gutterBottom>
             Final Grades
           </Typography>
-          <GradeTable rows={rows} />
+          <GradeTable rows={rows} loading={loading} />
         </Grid>
       </Grid>
     </div>
