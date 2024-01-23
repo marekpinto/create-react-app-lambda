@@ -6,7 +6,7 @@
  *
  * Anything that has a type of "undefined" you will need to replace with something.
  */
-import { IUniversityClass, IStudentClass, IAssignmentClass } from "../types/api_types";
+import { IStudentClass, IAssignmentClass } from "../types/api_types";
 import {BASE_API_URL, GET_DEFAULT_HEADERS, MY_BU_ID} from "../globals";
 
 

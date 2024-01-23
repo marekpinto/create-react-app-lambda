@@ -1,11 +1,5 @@
-import React, { useEffect, useState } from "react";
-
 import Box from '@mui/material/Box';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import {BASE_API_URL, GET_DEFAULT_HEADERS, MY_BU_ID} from "../globals";
-import { IStudentClass, IUniversityClass } from "../types/api_types";
-import { PowerInput } from '@mui/icons-material';
-
 
 /**
  * You might find it useful to have some dummy data for your own testing.
