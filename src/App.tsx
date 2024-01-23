@@ -11,6 +11,8 @@ import { IUniversityClass, IStudentClass } from "./types/api_types";
 
 import { GradeTable } from "./components/GradeTable";
 
+import { calcAllFinalGrade } from "./utils/calculate_grade";
+
 interface Row {
   id: string;
   name: string;
@@ -95,8 +97,9 @@ function App() {
   async function populateTable (classId: string) {
     const students: IStudentClass[] = await fetchStudents(classId);
     const course : IUniversityClass = await getClassById(classId);
+    const grades: Record<string, number> = await calcAllFinalGrade(classId, students);
     setRows(students.map((student) => (
-      { id: student.studentId, name: student.name, classId: classId, className: course.title, semester: 'fall2022', finalGrade: 0 }
+      { id: student.studentId, name: student.name, classId: classId, className: course.title, semester: 'fall2022', finalGrade: grades[student.studentId] }
     )
     ));
   
@@ -129,7 +132,7 @@ function App() {
           <Typography variant="h4" gutterBottom>
             Final Grades
           </Typography>
-          <GradeTable rows={rows} loading={loading} />
+          <GradeTable rows={rows} isLoading={loading} />
         </Grid>
       </Grid>
     </div>

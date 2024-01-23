@@ -75,7 +75,7 @@ const columns: GridColDef[] = [
 
 interface Props {
   rows: Row[];
-  loading: boolean;
+  isLoading: boolean;
 }
 
 /**
@@ -85,7 +85,7 @@ interface Props {
  * You might need to change the signature of this function.
  *
  */
-export const GradeTable: React.FC<Props> = ({rows, loading}) => {
+export const GradeTable: React.FC<Props> = ({rows, isLoading}) => {
 
 
   return (
@@ -102,7 +102,7 @@ export const GradeTable: React.FC<Props> = ({rows, loading}) => {
           },
         }}
         pageSizeOptions={[5,10,20,50,100]}
-        loading={loading}
+        loading={isLoading}
 
       />
     </Box>

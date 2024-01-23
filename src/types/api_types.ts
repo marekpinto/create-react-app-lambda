@@ -25,3 +25,10 @@ export interface IStudentClass {
   status: string;
   universityId: string;
 }
+
+export interface IAssignmentClass {
+  assignmentId: string,
+  classId: string,
+  date: string,
+  weight: number,
+}
