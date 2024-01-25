@@ -52,7 +52,7 @@ export async function calculateStudentFinalGrade(
   let finalGrade: number = 0;
 
   for (const assignment in classAssignments) {
-    finalGrade += (classAssignments[assignment] * grades[assignment]);
+    finalGrade += (classAssignments[assignment] * grades[assignment] / 100);
   }
 
   return finalGrade;
